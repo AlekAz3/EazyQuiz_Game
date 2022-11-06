@@ -34,6 +34,5 @@ public class Timer : MonoBehaviour
 			yield return null;
 		}
 		game.GetComponent<GameManager>().GameOverScreenOn("Время вышло");
-		
 	}
 }

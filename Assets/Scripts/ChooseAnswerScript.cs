@@ -5,18 +5,25 @@ using UnityEngine;
 using UnityEngine.UI;
 public class ChooseAnswerScript : MonoBehaviour
 {
-	[SerializeField] private Button button;
-	[SerializeField] private Text MainText;
-
+	public bool Is_Correct { get; set; }
 	[SerializeField] private GameObject Obj;
 	private GameManager game;
 	
 	private void Awake() {
 		game = Obj.GetComponent<GameManager>();
 	}
+
+
+	public void InitAns(answer answer)
+	{
+		this.GetComponentInChildren<Text>().text = answer.a_text;
+		this.Is_Correct = answer.is_correct;
+	}
+
+
 	public void Button_Click()
 	{
-		game.CheckAnswer(Convert.ToInt32(button.name));
+		game.CheckAnswer(this.Is_Correct);
 	}
 
 }

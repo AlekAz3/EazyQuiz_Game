@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
-using Newtonsoft.Json;
+
 using TMPro;
+using System.Text;
+using Newtonsoft.Json;
 
 public class GameManager : MonoBehaviour
 {
@@ -17,7 +19,7 @@ public class GameManager : MonoBehaviour
 	[SerializeField] private TextMeshProUGUI text_question;
     private questions question;
 	private List<answer> answers;
-	
+
 	private void Start() {
 		Loading();
 	}
@@ -51,7 +53,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator GetQuestion(int id)
 	{
 		string url = $"http://{adress}/api/Values/Get_Question?id_question={id}";
-
+		question = null;
         using (UnityWebRequest request = UnityWebRequest.Get(url))
 		{
 			yield return request.SendWebRequest();
@@ -67,6 +69,8 @@ public class GameManager : MonoBehaviour
 	{
 		string url = $"http://{adress}/api/Values/Get_Answer?id_question={id}";
 
+		answers = null;
+
 		using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
@@ -76,13 +80,44 @@ public class GameManager : MonoBehaviour
                 answers = JsonConvert.DeserializeObject<List<answer>>(request.downloadHandler.text);
         }
     }
-	
-	
-	
-	public void CheckAnswer(bool ans)
+
+	private IEnumerator PostUserAnswer(user_answer user_Answer)
+	{
+
+		string jsonstring = JsonConvert.SerializeObject(user_Answer);
+        var request = new UnityWebRequest($"http://{adress}/api/Values/Post_User_answer", "POST");
+		byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonstring);
+		request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+		request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+		request.SetRequestHeader("Content-Type", "application/json");
+		yield return request.SendWebRequest();
+		Debug.Log("Status Code: " + request.responseCode);
+
+		//WWWForm form = new WWWForm();
+		//form.AddField("user_answer", "text");
+		//form.AddBinaryData("user_answer", Encoding.UTF8.GetBytes(JsonUtility.ToJson(user_Answer)));
+
+
+		//using (UnityWebRequest www = UnityWebRequest.Post($"http://{adress}/api/Values/Post_User_answer", form))
+		//{
+		//	yield return www.SendWebRequest();
+
+		//	if (www.result != UnityWebRequest.Result.Success)
+		//		Debug.Log(www.error);
+		//	else
+		//		Debug.Log("Form upload complete!");
+
+		//}
+
+	}
+
+
+
+    public void CheckAnswer(answer answer)
 	{
 		Timer.GetComponent<Timer>().StopAllCoroutines();
-		if (ans)
+		StartCoroutine(PostUserAnswer(new user_answer(1, answer.id_answer, question.id_question)));
+		if (answer.is_correct)
 			GameOverScreenOn("Правильно");
 		else
 			GameOverScreenOn("Неправильно");

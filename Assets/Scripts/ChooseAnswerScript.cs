@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 public class ChooseAnswerScript : MonoBehaviour
 {
-	public bool Is_Correct { get; set; }
+	private answer answer;
 	[SerializeField] private GameObject Obj;
 	private GameManager game;
 	
@@ -14,16 +14,17 @@ public class ChooseAnswerScript : MonoBehaviour
 	}
 
 
-	public void InitAns(answer answer)
+	public void InitAns(answer answer1)
 	{
-		this.GetComponentInChildren<Text>().text = answer.a_text;
-		this.Is_Correct = answer.is_correct;
+		this.answer = answer1;
+		this.GetComponentInChildren<Text>().text = this.answer.a_text;
+		
 	}
 
 
 	public void Button_Click()
 	{
-		game.CheckAnswer(this.Is_Correct);
+		game.CheckAnswer(answer);
 	}
 
 }
